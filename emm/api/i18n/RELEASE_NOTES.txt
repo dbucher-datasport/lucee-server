@@ -1,0 +1,2 @@
+v 1.0 released 12/15/2009
+- Initial public release
