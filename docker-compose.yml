@@ -1,0 +1,12 @@
+version: "3.6"
+services:
+  lucee-server:
+    image: lucee/lucee:latest
+    container_name: lucee-server
+    volumes:
+      - $LUCEE_WWW_PATH:/var/www
+      - ./password.txt:/opt/lucee/server/lucee-server/context/password.txt
+    restart: always
+    ports:
+      - 8080:80
+      - 80:8888
