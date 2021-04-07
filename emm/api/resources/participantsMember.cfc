@@ -49,7 +49,7 @@
 					<cfset participant["firstname"] = firstname>
 					<cfset participant["lastname"] = lastname>
 					<cfset participant["nationality"] = nationality>
-					<cfset participant["birthday"] = birthday>
+					<cfset participant["birthday"] = lsDateFormat(birthday, "yyyy-mm-dd") & "T" & lsTimeFormat(birthday, "HH:mm:ss") & ".000Z">
 					<cfset participant["gender"] = gender>
 					<cfset participant["street1"] = street1>
 					<cfset participant["country"] = country>

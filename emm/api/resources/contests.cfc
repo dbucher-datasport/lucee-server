@@ -27,85 +27,94 @@
 				</cfif>
 
 				<cfquery name="local.qContest">
-					SELECT *, name_#sessionLang# AS name
+					SELECT *
 					FROM contest
+					WHERE edition_id = 1 <!--- todo: arguments.editionId --->
+					<!--- AND onreg_active = 1 --->
+					ORDER BY onreg_sort
 				</cfquery>
 
-				<cfloop query="qContest">
-					<cfset var contest = [:]>
-					<cfset contest["id"] = contest_id>
-					<cfset contest["name"] = name>
-					<cfset contest["dateFrom"] = isDate(date_from) ? lsDateFormat(date_from, "yyyy-mm-dd") & "T" & lsTimeFormat(date_from, "HH:mm:ss") : "">
-					<cfset contest["dateTo"] = isDate(date_to) ? lsDateFormat(date_to, "yyyy-mm-dd") & "T" & lsTimeFormat(date_to, "HH:mm:ss") : "">
+				<cfif qContest.recordcount>
+					<cfloop query="qContest">
+						<cfset var contest = [:]>
+						<cfset contest["id"] = contest_id>
+						<cfset contest["name"] = name>
+						<cfset contest["dateFrom"] = isDate(date_from) ? lsDateFormat(date_from, "yyyy-mm-dd") & "T" & lsTimeFormat(date_from, "HH:mm:ss") : "">
+						<cfset contest["dateTo"] = isDate(date_to) ? lsDateFormat(date_to, "yyyy-mm-dd") & "T" & lsTimeFormat(date_to, "HH:mm:ss") : "">
+						<cfset contest["registrationFrom"] = isDate(onreg_from) ? lsDateFormat(onreg_from, "yyyy-mm-dd") & "T" & lsTimeFormat(onreg_from, "HH:mm:ss") : "">
+						<cfset contest["registrationTo"] = isDate(onreg_to) ? lsDateFormat(onreg_to, "yyyy-mm-dd") & "T" & lsTimeFormat(onreg_to, "HH:mm:ss") : "">
 
-					<cfquery name="local.qCurrentPrice">
-						SELECT *
-						FROM contest_price
-						WHERE contest_id = <cfqueryparam value="#contest_id#" cfsqltype="cf_sql_integer">
-						AND (date_from is null OR date_from <= <cfqueryparam value="#now()#" cfsqltype="cf_sql_timestamp">)
-						AND (date_to is null OR date_to >= <cfqueryparam value="#now()#" cfsqltype="cf_sql_timestamp">)
-						ORDER BY date_from DESC
-					</cfquery>
+						<cfquery name="local.qCurrentPrice">
+							SELECT *
+							FROM contest_price
+							WHERE contest_id = <cfqueryparam value="#contest_id#" cfsqltype="cf_sql_integer">
+							AND (date_from is null OR date_from <= <cfqueryparam value="#now()#" cfsqltype="cf_sql_timestamp">)
+							AND (date_to is null OR date_to >= <cfqueryparam value="#now()#" cfsqltype="cf_sql_timestamp">)
+							ORDER BY date_from DESC
+						</cfquery>
 
-					<cfif qCurrentPrice.recordcount>
-						<cfset contest["currentPrice"] = [:]>
-						<cfset contest["currentPrice"]["amount"] = lsNumberFormat(qCurrentPrice.amount, ".00")>
-						<cfset var amountType = {amount: "string"}>
-						<cfset contest["currentPrice"].setMetadata(amountType)>
-						<cfset contest["currentPrice"]["currency"] = qCurrentPrice.currency>
-						<cfset contest["currentPrice"]["dateFrom"] = isDate(qCurrentPrice.date_from) ? lsDateFormat(qCurrentPrice.date_from, "yyyy-mm-dd") & "T" & lsTimeFormat(qCurrentPrice.date_from, "HH:mm:ss") : "">
-						<cfset contest["currentPrice"]["dateTo"] = isDate(qCurrentPrice.date_to) ? lsDateFormat(qCurrentPrice.date_to, "yyyy-mm-dd") & "T" & lsTimeFormat(qCurrentPrice.date_to, "HH:mm:ss") : "">
-						<cfset contest["currentPrice"]["ageFrom"] = qCurrentPrice.age_from>
-						<cfset contest["currentPrice"]["ageTo"] = qCurrentPrice.age_to>
-						<cfif currentrow EQ 1>
-							<cfset contest["currentPrice"]["alternativeAmount"] = lsNumberFormat(qCurrentPrice.amount-10, ".00")>
-							<cfset var alternativeAmountType = {alternativeAmount: "string"}>
-							<cfset contest["currentPrice"].setMetadata(alternativeAmountType)>
-							<cfset contest["currentPrice"]["alternativeAgeFrom"] = 7>
-						<cfset contest["currentPrice"]["alternativeAgeTo"] = 9>
+						<cfif qCurrentPrice.recordcount>
+							<cfset contest["currentPrice"] = [:]>
+							<cfset contest["currentPrice"]["amount"] = lsNumberFormat(qCurrentPrice.amount, ".00")>
+							<cfset var amountType = {amount: "string"}>
+							<cfset contest["currentPrice"].setMetadata(amountType)>
+							<cfset contest["currentPrice"]["currency"] = qCurrentPrice.currency>
+							<cfset contest["currentPrice"]["dateFrom"] = isDate(qCurrentPrice.date_from) ? lsDateFormat(qCurrentPrice.date_from, "yyyy-mm-dd") & "T" & lsTimeFormat(qCurrentPrice.date_from, "HH:mm:ss") : "">
+							<cfset contest["currentPrice"]["dateTo"] = isDate(qCurrentPrice.date_to) ? lsDateFormat(qCurrentPrice.date_to, "yyyy-mm-dd") & "T" & lsTimeFormat(qCurrentPrice.date_to, "HH:mm:ss") : "">
+							<cfset contest["currentPrice"]["ageFrom"] = qCurrentPrice.age_from>
+							<cfset contest["currentPrice"]["ageTo"] = qCurrentPrice.age_to>
+							<cfif currentrow EQ 1>
+								<cfset contest["currentPrice"]["alternativeAmount"] = lsNumberFormat(qCurrentPrice.amount-10, ".00")>
+								<cfset var alternativeAmountType = {alternativeAmount: "string"}>
+								<cfset contest["currentPrice"].setMetadata(alternativeAmountType)>
+								<cfset contest["currentPrice"]["alternativeAgeFrom"] = 7>
+							<cfset contest["currentPrice"]["alternativeAgeTo"] = 9>
+							</cfif>
 						</cfif>
-					</cfif>
 
-					<cfquery name="local.qFuturePrice">
-						SELECT *
-						FROM contest_price
-						WHERE contest_id = <cfqueryparam value="#contest_id#" cfsqltype="cf_sql_integer">
-						AND date_from >= <cfqueryparam value="#now()#" cfsqltype="cf_sql_timestamp">
-						ORDER BY date_from
-					</cfquery>
+						<cfquery name="local.qFuturePrice">
+							SELECT *
+							FROM contest_price
+							WHERE contest_id = <cfqueryparam value="#contest_id#" cfsqltype="cf_sql_integer">
+							AND date_from >= <cfqueryparam value="#now()#" cfsqltype="cf_sql_timestamp">
+							ORDER BY date_from
+						</cfquery>
 
-					<cfif qFuturePrice.recordcount>
-						<cfset contest["futurePrice"] = [:]>
-						<cfset contest["futurePrice"]["amount"] = lsNumberFormat(qFuturePrice.amount, ".00")>
-						<cfset var amountType = {amount: "string"}>
-						<cfset contest["futurePrice"].setMetadata(amountType)>
-						<cfset contest["futurePrice"]["currency"] = qFuturePrice.currency>
-						<cfset contest["futurePrice"]["dateFrom"] = isDate(qFuturePrice.date_from) ? lsDateFormat(qFuturePrice.date_from, "yyyy-mm-dd") & "T" & lsTimeFormat(qFuturePrice.date_from, "HH:mm:ss") : "">
-						<cfset contest["futurePrice"]["dateTo"] = isDate(qFuturePrice.date_to) ? lsDateFormat(qFuturePrice.date_to, "yyyy-mm-dd") & "T" & lsTimeFormat(qFuturePrice.date_to, "HH:mm:ss") : "">
-						<cfset contest["futurePrice"]["ageFrom"] = qFuturePrice.age_from>
-						<cfset contest["futurePrice"]["ageTo"] = qFuturePrice.age_to>
-					</cfif>
+						<cfif qFuturePrice.recordcount>
+							<cfset contest["futurePrice"] = [:]>
+							<cfset contest["futurePrice"]["amount"] = lsNumberFormat(qFuturePrice.amount, ".00")>
+							<cfset var amountType = {amount: "string"}>
+							<cfset contest["futurePrice"].setMetadata(amountType)>
+							<cfset contest["futurePrice"]["currency"] = qFuturePrice.currency>
+							<cfset contest["futurePrice"]["dateFrom"] = isDate(qFuturePrice.date_from) ? lsDateFormat(qFuturePrice.date_from, "yyyy-mm-dd") & "T" & lsTimeFormat(qFuturePrice.date_from, "HH:mm:ss") : "">
+							<cfset contest["futurePrice"]["dateTo"] = isDate(qFuturePrice.date_to) ? lsDateFormat(qFuturePrice.date_to, "yyyy-mm-dd") & "T" & lsTimeFormat(qFuturePrice.date_to, "HH:mm:ss") : "">
+							<cfset contest["futurePrice"]["ageFrom"] = qFuturePrice.age_from>
+							<cfset contest["futurePrice"]["ageTo"] = qFuturePrice.age_to>
+						</cfif>
 
-					<cfquery name="local.qAttribute">
-						SELECT *, label_#sessionLang# AS label
-						FROM contest_attribute
-						WHERE contest_id = <cfqueryparam value="#contest_id#" cfsqltype="cf_sql_integer">
-					</cfquery>
+						<cfquery name="local.qAttribute">
+							SELECT *, label_#sessionLang# AS label
+							FROM contest_attribute
+							WHERE contest_id = <cfqueryparam value="#contest_id#" cfsqltype="cf_sql_integer">
+						</cfquery>
 
-					<cfset contest["attributes"] = []>
+						<cfset contest["attributes"] = []>
 
-					<cfloop query="qAttribute">
-						<cfset var attribute = [:]>
-						<cfset attribute["key"] = key>
-						<cfset attribute["label"] = label>
-						<cfset attribute["value"] = value>
-						<cfset arrayAppend(contest["attributes"], attribute)>
+						<cfloop query="qAttribute">
+							<cfset var attribute = [:]>
+							<cfset attribute["key"] = key>
+							<cfset attribute["label"] = label>
+							<cfset attribute["value"] = value>
+							<cfset arrayAppend(contest["attributes"], attribute)>
+						</cfloop>
+
+						<cfset arrayAppend(aContest, contest)>
 					</cfloop>
 
-					<cfset arrayAppend(aContest, contest)>
-				</cfloop>
-
-				<cfreturn rep(aContest)>
+					<cfreturn rep(aContest)>
+				<cfelse>
+					<cfreturn noData().withStatus(404)>
+				</cfif>
 			<cfelse>
 				<cfreturn noData().withStatus(403)>
 			</cfif>

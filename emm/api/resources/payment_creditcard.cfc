@@ -36,13 +36,13 @@
 
 				<cfif isWDDX(cfhttp.filecontent)>
 					<cfwddx action="wddx2cfml" input="#cfhttp.filecontent#" output="local.response"></cfwddx>
+					<cfreturn rep(response).withStatus(301)>
 				<cfelse>
 					<cfset var response = {}>
 					<cfset response["status"] = "error">
 					<cfset response["message"] = REReplaceNoCase(trim(cfhttp.filecontent), "<[^><]*>", '', 'ALL')>
+					<cfreturn rep(response)>
 				</cfif>
-
-				<cfreturn rep(response)>
 			<cfelse>
 				<cfreturn noData().withStatus(403)>
 			</cfif>

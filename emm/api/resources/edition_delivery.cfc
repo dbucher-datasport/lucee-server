@@ -23,20 +23,24 @@
 					<!--- WHERE edition_id = <cfqueryparam value="#arguments.editionId#" cfsqltype="cf_sql_integer"> --->
 				</cfquery>
 
-				<cfset var aDelivery = []>
+				<cfif qDelivery.recordcount>
+					<cfset var aDelivery = []>
 
-				<cfloop query="qDelivery">
-					<cfset var delivery = [:]>
-					<cfset delivery.setMetadata({amount: "string"})>
-					<cfset delivery["type"] = type>
-					<cfset delivery["title"] = title>
-					<cfset delivery["text"] = text>
-					<cfset delivery["currency"] = currency>
-					<cfset delivery["amount"] = lsNumberFormat(amount, ".00")>
-					<cfset arrayAppend(aDelivery, delivery)>
-				</cfloop>
+					<cfloop query="qDelivery">
+						<cfset var delivery = [:]>
+						<cfset delivery.setMetadata({amount: "string"})>
+						<cfset delivery["type"] = type>
+						<cfset delivery["title"] = title>
+						<cfset delivery["text"] = text>
+						<cfset delivery["currency"] = currency>
+						<cfset delivery["amount"] = lsNumberFormat(amount, ".00")>
+						<cfset arrayAppend(aDelivery, delivery)>
+					</cfloop>
 
-				<cfreturn rep(aDelivery)>
+					<cfreturn rep(aDelivery)>
+				<cfelse>
+					<cfreturn noData().withStatus(404)>
+				</cfif>
 			<cfelse>
 				<cfreturn noData().withStatus(403)>
 			</cfif>

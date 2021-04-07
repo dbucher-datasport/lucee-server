@@ -81,7 +81,7 @@
 					</cfif>
 
 					<cfquery name="local.qContest">
-						SELECT *, name_#sessionLang# AS name
+						SELECT *
 						FROM contest
 						WHERE contest_id = <cfqueryparam value="#arguments.contestId#" cfsqltype="cf_sql_integer">
 					</cfquery>
@@ -179,7 +179,7 @@
 				</cfif>
 
 				<cfquery name="local.qContest">
-					SELECT *, name_#sessionLang# AS name
+					SELECT *
 					FROM contest
 					WHERE contest_id = <cfqueryparam value="#arguments.contestId#" cfsqltype="cf_sql_integer">
 				</cfquery>

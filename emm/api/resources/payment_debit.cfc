@@ -29,9 +29,9 @@
 						<cfhttpparam type="formfield" name="type" value="#uCase(arguments.type)#">
 					</cfhttp>
 
-					<cfwddx action="wddx2cfml" input="#cfhttp.filecontent#" output="local.response"></cfwddx>
+					<cfwddx action="wddx2cfml" input="#cfhttp.filecontent#" output="local.response">
 
-					<cfreturn rep(response)>
+					<cfreturn rep(response).withStatus(301)>
 				<cfelse>
 					<cfhttp url="#application.paymentURL#/httppay_card.htm" method="post" userAgent="redjunky">
 						<cfhttpparam type="formfield" name="orderuid" value="#arguments.orderId#">
@@ -45,14 +45,14 @@
 					</cfhttp>
 
 					<cfif isWDDX(cfhttp.filecontent)>
-						<cfwddx action="wddx2cfml" input="#cfhttp.filecontent#" output="local.response"></cfwddx>
+						<cfwddx action="wddx2cfml" input="#cfhttp.filecontent#" output="local.response">
+						<cfreturn rep(response).withStatus(301)>
 					<cfelse>
 						<cfset var response = {}>
 						<cfset response["status"] = "error">
 						<cfset response["message"] = REReplaceNoCase(trim(cfhttp.filecontent), "<[^><]*>", '', 'ALL')>
+						<cfreturn rep(response)>
 					</cfif>
-
-					<cfreturn rep(response)>
 				</cfif>
 			<cfelse>
 				<cfreturn noData().withStatus(403)>

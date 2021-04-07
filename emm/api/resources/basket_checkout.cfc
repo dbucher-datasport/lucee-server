@@ -39,7 +39,7 @@
 
 				<cfset var basket = application.oBasket.getBasketStruct(arguments.sessionId)>
 
-				<cfwddx action="cfml2wddx" input="#basket#" output="local.basketWddx"></cfwddx>
+				<cfwddx action="cfml2wddx" input="#basket#" output="local.basketWddx">
 
 				<cfquery datasource="reg2">
 					INSERT INTO WaitPayment (PayID, PayTyp, userlang, DataDS, PayStatus, PayHist)

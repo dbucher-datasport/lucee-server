@@ -44,8 +44,9 @@
 					<cfhttpparam type="formfield" name="orderuid" value="#arguments.orderId#">
 					<cfhttpparam type="formfield" name="type" value="#uCase(arguments.type)#">
 				</cfhttp>
-
-				<cfwddx action="wddx2cfml" input="#cfhttp.filecontent#" output="local.response"></cfwddx>
+				<cfdump var="#cfhttp#">
+				<cfabort>
+				<cfwddx action="wddx2cfml" input="#cfhttp.filecontent#" output="local.response">
 
 				<cfreturn rep(response)>
 			<cfelse>

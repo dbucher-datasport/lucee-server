@@ -30,7 +30,7 @@
 					WHERE orderuid = <cfqueryparam value="#arguments.orderId#" cfsqltype="CF_SQL_VARCHAR">
 				</cfquery>
 
-				<cfhttp method="post" url="#application.paymentURL#httppaymethodes.htm" userAgent="redjunky">
+				<cfhttp method="post" url="#application.paymentURL#/httppaymethodes.htm" userAgent="redjunky" result="local.payMethod">
 					<cfhttpparam name="notShowSue" type="FormField" value="true">
 					<cfhttpparam name="isBaslerStadtlauf" type="FormField" value="false">
 					<cfhttpparam name="isTortour" type="FormField" value="false">
@@ -44,7 +44,7 @@
 					<cfhttpparam name="lang" type="FormField" value="#sessionLang#">
 				</cfhttp>
 
-				<cfset var xml = trim(left(cfhttp.FileContent, Find("</reply>", cfhttp.FileContent)+7))>
+				<cfset var xml = trim(left(payMethod.FileContent, Find("</reply>", payMethod.FileContent)+7))>
 				<cfset var paymethodes = XmlParse(xml)>
 
 				<cfset stPaymethod = {}>
@@ -72,9 +72,9 @@
 						</cfif>
 						<cfset var payItem = [:]>
 						<cfset payItem.setMetadata({fee: "string"})>
-						<cfset payItem["type"] = shortdesc>
+						<cfset payItem["paymethod"] = shortdesc>
 						<cfset payItem["title"] = paymethod.longdesc.xmlText>
-						<cfhttp method = "post" url = "#application.paymentURL#httpfee.htm" userAgent = "redjunky" result="local.httpfee">
+						<cfhttp method = "post" url = "#application.paymentURL#/httpfee.htm" userAgent = "redjunky" result="local.httpfee">
 							<cfhttpparam name = "paymethod" type = "FormField" value = "#shortdesc#">
 							<cfhttpparam name = "currency" type = "FormField" value = "#qOrder.order_currency#">
 							<cfhttpparam name = "amount" type = "FormField" value = "#qOrder.order_amount#">
@@ -86,13 +86,15 @@
 				</cfloop>
 
 				<cfset aPaymethod = []>
+
 				<cfloop list="creditcard,debit,phone,online,transfer,coupon" index="local.filter">
 					<cfif structKeyExists(stPaymethod, filter)>
-						<cfset var newPaymethod = [:]>
-						<cfset newPaymethod["type"] = filter>
-						<cfset newPaymethod["name"] = application.strings.getString("pm#filter#", sessionLang)>
-						<cfset newPaymethod["method"] = stPaymethod[filter]>
-						<cfset arrayAppend(aPaymethod, newPaymethod)>
+						<cfloop array="#stPaymethod[filter]#" index="local.i">
+							<cfset var newPaymethod = [:]>
+							<cfset newPaymethod = duplicate(i)>
+							<cfset newPaymethod["type"] = filter>
+							<cfset arrayAppend(aPaymethod, newPaymethod)>
+						</cfloop>
 					</cfif>
 				</cfloop>
 

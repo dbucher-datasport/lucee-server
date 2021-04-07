@@ -30,7 +30,7 @@
 					<cfset infotext["isOpen"] = qInfotext.isOpen ? "true" : "false">
 					<cfreturn rep(infotext)>
 				<cfelse>
-					<cfreturn noData()>
+					<cfreturn noData().withStatus(404)>
 				</cfif>
 			<cfelse>
 				<cfreturn noData().withStatus(403)>
